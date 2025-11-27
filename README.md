@@ -8,7 +8,7 @@ A machine learning pipeline for classifying waste images into 12 categories usin
 
 ## Demo
 
-**YouTube Video:** [Watch Demo](https://youtube.com/your-video-link)
+**Video Demo:** [Watch Demo](https://share.vidyard.com/watch/Gcb9wMZnkHG3yxKDM9Lg2s)
 
 **Live URL:** [https://waste-classifier-b8wx.onrender.com/](https://waste-classifier-b8wx.onrender.com/)
 **Swagger:** [https://waste-classifier-b8wx.onrender.com/docs#](https://waste-classifier-b8wx.onrender.com/docs#)
