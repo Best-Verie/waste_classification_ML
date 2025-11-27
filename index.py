@@ -76,8 +76,16 @@ def serve_ui():
     h1 { text-align:center; color: #2c3e50; margin-bottom: 30px; }
     .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
     h2 { color: #16a085; margin-bottom: 15px; }
-    .upload-area { border: 2px dashed #16a085; border-radius: 10px; padding: 40px; text-align: center; cursor:pointer; transition: all 0.2s; }
-    .upload-area:hover { background: #e8f6f3; }
+    .upload-area { 
+        border: 2px dashed #16a085; 
+        border-radius: 10px; 
+        padding: 40px; 
+        text-align: center; 
+        cursor:pointer; 
+        transition: all 0.2s; 
+        background:white;
+    }
+    .upload-area.hover { background: #e8f6f3; }
     input[type="file"] { display: none; }
     #preview { display:none; max-width: 250px; margin: 20px auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .btn { background: #16a085; color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; margin-top:10px; }
@@ -93,18 +101,23 @@ def serve_ui():
 </head>
 <body>
 <div class="container">
-    <h1>🌿 Garbage Classifier</h1>
+    <h1>Garbage Classifier</h1>
 
     <div class="card">
         <h2>Classify Your Waste</h2>
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+
+        <div class="upload-area" id="dropArea">
             <p>Click or drag an image here</p>
         </div>
-        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+
+        <input type="file" id="fileInput" accept="image/*">
+
         <img id="preview">
+
         <div style="text-align:center;">
             <button class="btn" id="predictBtn" onclick="predict()" disabled>Classify</button>
         </div>
+
         <div id="result"></div>
     </div>
 
@@ -130,14 +143,45 @@ def serve_ui():
 
 <script>
 let selectedFile = null;
-function previewImage(e) {
-    selectedFile = e.target.files[0];
-    const preview = document.getElementById('preview');
-    preview.src = URL.createObjectURL(selectedFile);
-    preview.style.display = 'block';
-    document.getElementById('predictBtn').disabled = false;
+
+// =========================
+// DRAG & DROP FIX
+// =========================
+const dropArea = document.getElementById("dropArea");
+const fileInput = document.getElementById("fileInput");
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
 }
 
+["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+});
+
+dropArea.addEventListener("dragover", () => dropArea.classList.add("hover"));
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("hover"));
+dropArea.addEventListener("drop", (e) => {
+    dropArea.classList.remove("hover");
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+});
+
+dropArea.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+function handleFile(file) {
+    selectedFile = file;
+    const preview = document.getElementById("preview");
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    document.getElementById("predictBtn").disabled = false;
+}
+
+// =========================
+// PREDICT
+// =========================
 async function predict() {
     if (!selectedFile) return;
     document.getElementById('result').innerHTML = '<p>Classifying...</p>';
@@ -158,6 +202,9 @@ async function predict() {
     }
 }
 
+// =========================
+// RETRAIN
+// =========================
 async function retrain() {
     const epochs = document.getElementById('epochs').value;
     document.getElementById('retrainResult').innerHTML = '<p>Starting retraining...</p>';
@@ -170,6 +217,9 @@ async function retrain() {
     }
 }
 
+// =========================
+// METRICS
+// =========================
 async function loadMetrics() {
     try {
         const res = await fetch('/metrics');
@@ -183,6 +233,7 @@ async function loadMetrics() {
 loadMetrics();
 setInterval(loadMetrics, 5000);
 </script>
+
 </body>
 </html>
 """
