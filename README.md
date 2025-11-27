@@ -10,7 +10,9 @@ A machine learning pipeline for classifying waste images into 12 categories usin
 
 **YouTube Video:** [Watch Demo](https://youtube.com/your-video-link)
 
-**Live URL:** [https://your-app.onrender.com](https://your-app.onrender.com)
+**Live URL:** [https://waste-classifier-b8wx.onrender.com/](https://waste-classifier-b8wx.onrender.com/)
+**Swagger:** [https://waste-classifier-b8wx.onrender.com/docs#](https://waste-classifier-b8wx.onrender.com/docs#)
+
 
 ---
 
@@ -71,7 +73,7 @@ waste_classification_ML/
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/waste_classification_ML.git
+git clone https://github.com/Best-Verie/waste_classification_ML.git
 cd waste_classification_ML
 pip install -r requirements.txt
 python index.py
