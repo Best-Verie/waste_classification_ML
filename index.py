@@ -67,126 +67,124 @@ def serve_ui():
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garbage Classification</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #11998e, #38ef7d); min-height: 100vh; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { color: white; text-align: center; margin-bottom: 20px; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-        .card h2 { color: #11998e; margin-bottom: 15px; }
-        .upload-area { border: 2px dashed #11998e; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; }
-        .upload-area:hover { background: #f0fff0; }
-        input[type="file"] { display: none; }
-        .btn { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; margin: 5px; }
-        .btn:hover { opacity: 0.9; }
-        .btn:disabled { opacity: 0.5; }
-        #preview { max-width: 200px; margin: 15px auto; display: none; border-radius: 10px; }
-        .result { background: #f0f0f0; padding: 15px; border-radius: 5px; margin-top: 15px; }
-        .result h3 { color: #11998e; }
-        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
-        .metric { background: #11998e; color: white; padding: 15px; border-radius: 5px; }
-        .metric span { font-size: 1.5em; font-weight: bold; }
-        footer { text-align: center; color: white; margin-top: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garbage Classifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Montserrat', sans-serif; background: #f4f7fa; color: #333; }
+    .container { max-width: 900px; margin: 30px auto; padding: 20px; }
+    h1 { text-align:center; color: #2c3e50; margin-bottom: 30px; }
+    .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+    h2 { color: #16a085; margin-bottom: 15px; }
+    .upload-area { border: 2px dashed #16a085; border-radius: 10px; padding: 40px; text-align: center; cursor:pointer; transition: all 0.2s; }
+    .upload-area:hover { background: #e8f6f3; }
+    input[type="file"] { display: none; }
+    #preview { display:none; max-width: 250px; margin: 20px auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn { background: #16a085; color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; margin-top:10px; }
+    .btn:hover { background: #13856e; }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; }
+    .result { background:#ecf0f1; padding:15px; border-radius:8px; margin-top:15px; }
+    .result h3 { color:#16a085; }
+    footer { text-align:center; margin-top:30px; color:#7f8c8d; font-size:0.9em; }
+    .metrics { display:flex; justify-content:space-around; margin-top:15px; }
+    .metric { background:#16a085; color:white; padding:15px 20px; border-radius:8px; text-align:center; flex:1; margin:0 5px; }
+    .metric span { display:block; font-size:1.6em; font-weight:700; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>Garbage Classification</h1>
-        
-        <div class="card">
-            <h2> Classify Waste</h2>
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <p> Click to upload garbage image</p>
-            </div>
-            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
-            <img id="preview">
-            <div style="text-align: center; margin-top: 15px;">
-                <button class="btn" id="predictBtn" onclick="predict()" disabled>Classify</button>
-            </div>
-            <div id="result"></div>
+<div class="container">
+    <h1>🌿 Garbage Classifier</h1>
+
+    <div class="card">
+        <h2>Classify Your Waste</h2>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>Click or drag an image here</p>
         </div>
-        
-        <div class="card">
-            <h2> Retrain Model</h2>
-            <p>Epochs: <input type="number" id="epochs" value="5" min="1" max="20" style="width: 60px; padding: 5px;"></p>
-            <button class="btn" onclick="retrain()">Start Retraining</button>
-            <div id="retrainResult"></div>
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+        <img id="preview">
+        <div style="text-align:center;">
+            <button class="btn" id="predictBtn" onclick="predict()" disabled>Classify</button>
         </div>
-        
-        <div class="card">
-            <h2> System Metrics</h2>
-            <div class="metrics">
-                <div class="metric"><span id="predictions">0</span><br>Predictions</div>
-                <div class="metric"><span id="uptime">0s</span><br>Uptime</div>
-                <div class="metric"><span id="status">-</span><br>Status</div>
-            </div>
-            <button class="btn" onclick="loadMetrics()" style="margin-top: 15px;">Refresh</button>
-        </div>
-        
-        <footer>Garbage Classification | Best Verie | ALU 2025</footer>
+        <div id="result"></div>
     </div>
 
-    <script>
-        let selectedFile = null;
+    <div class="card">
+        <h2>Retrain Model</h2>
+        <p>Epochs: <input type="number" id="epochs" value="5" min="1" max="20" style="width:60px; padding:5px;"></p>
+        <button class="btn" onclick="retrain()">Start Retraining</button>
+        <div id="retrainResult"></div>
+    </div>
 
-        function previewImage(e) {
-            selectedFile = e.target.files[0];
-            const preview = document.getElementById('preview');
-            preview.src = URL.createObjectURL(selectedFile);
-            preview.style.display = 'block';
-            document.getElementById('predictBtn').disabled = false;
-        }
+    <div class="card">
+        <h2>System Metrics</h2>
+        <div class="metrics">
+            <div class="metric"><span id="predictions">0</span>Predictions</div>
+            <div class="metric"><span id="uptime">0s</span>Uptime</div>
+            <div class="metric"><span id="status">Idle</span>Status</div>
+        </div>
+        <div style="text-align:center;"><button class="btn" onclick="loadMetrics()">Refresh Metrics</button></div>
+    </div>
 
-        async function predict() {
-            if (!selectedFile) return;
-            document.getElementById('result').innerHTML = '<p>Classifying...</p>';
-            
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            
-            try {
-                const res = await fetch('/predict', { method: 'POST', body: formData });
-                const data = await res.json();
-                document.getElementById('result').innerHTML = `
-                    <div class="result">
-                        <h3> ${data.prediction}</h3>
-                        <p>Confidence: ${(data.confidence * 100).toFixed(2)}%</p>
-                        <p><strong>Top 5:</strong></p>
-                        ${data.top_5.map((p, i) => `<p>${i+1}. ${p.class}: ${(p.confidence * 100).toFixed(2)}%</p>`).join('')}
-                    </div>`;
-            } catch (e) {
-                document.getElementById('result').innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
-            }
-        }
+    <footer>Garbage Classifier | Best Verie | ALU 2025</footer>
+</div>
 
-        async function retrain() {
-            const epochs = document.getElementById('epochs').value;
-            document.getElementById('retrainResult').innerHTML = '<p>Starting...</p>';
-            try {
-                const res = await fetch(`/retrain?epochs=${epochs}`, { method: 'POST' });
-                const data = await res.json();
-                document.getElementById('retrainResult').innerHTML = `<p style="color:green"> ${data.message}</p>`;
-            } catch (e) {
-                document.getElementById('retrainResult').innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
-            }
-        }
+<script>
+let selectedFile = null;
+function previewImage(e) {
+    selectedFile = e.target.files[0];
+    const preview = document.getElementById('preview');
+    preview.src = URL.createObjectURL(selectedFile);
+    preview.style.display = 'block';
+    document.getElementById('predictBtn').disabled = false;
+}
 
-        async function loadMetrics() {
-            try {
-                const res = await fetch('/metrics');
-                const data = await res.json();
-                document.getElementById('predictions').textContent = data.predictions;
-                document.getElementById('uptime').textContent = Math.round(data.uptime_seconds) + 's';
-                document.getElementById('status').textContent = data.retrain_status;
-            } catch (e) { console.error(e); }
-        }
+async function predict() {
+    if (!selectedFile) return;
+    document.getElementById('result').innerHTML = '<p>Classifying...</p>';
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    try {
+        const res = await fetch('/predict', { method:'POST', body:formData });
+        const data = await res.json();
+        document.getElementById('result').innerHTML = `
+            <div class="result">
+                <h3>Prediction: ${data.prediction}</h3>
+                <p>Confidence: ${(data.confidence*100).toFixed(2)}%</p>
+                <p><strong>Top 5 Classes:</strong></p>
+                ${data.top_5.map((p,i)=>`<p>${i+1}. ${p.class}: ${(p.confidence*100).toFixed(2)}%</p>`).join('')}
+            </div>`;
+    } catch(e) {
+        document.getElementById('result').innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
+    }
+}
 
-        loadMetrics();
-        setInterval(loadMetrics, 5000);
-    </script>
+async function retrain() {
+    const epochs = document.getElementById('epochs').value;
+    document.getElementById('retrainResult').innerHTML = '<p>Starting retraining...</p>';
+    try {
+        const res = await fetch(`/retrain?epochs=${epochs}`, { method:'POST' });
+        const data = await res.json();
+        document.getElementById('retrainResult').innerHTML = `<p style="color:green">${data.message}</p>`;
+    } catch(e) {
+        document.getElementById('retrainResult').innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
+    }
+}
+
+async function loadMetrics() {
+    try {
+        const res = await fetch('/metrics');
+        const data = await res.json();
+        document.getElementById('predictions').textContent = data.predictions;
+        document.getElementById('uptime').textContent = Math.round(data.uptime_seconds)+'s';
+        document.getElementById('status').textContent = data.retrain_status;
+    } catch(e){console.error(e);}
+}
+
+loadMetrics();
+setInterval(loadMetrics, 5000);
+</script>
 </body>
 </html>
 """
